@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Baltimore Sports Widget</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 30px;
+      font-size: 2em;
+      color: #ffcc00;
+    }
+    .event {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🏈 Baltimore Ravens</h2>
+  <div id="ravens-event" class="event">Loading...</div>
+
+  <h2>⚾ Baltimore Orioles</h2>
+  <div id="orioles-event" class="event">Loading...</div>
+
+  <script>
+    // Team IDs from TheSportsDB
+    const RAVENS_ID = '134919';
+    const ORIOLES_ID = '136882';
+
+    async function fetchNextGame(teamId, elementId) {
+      try {
+        const res = await fetch(`https://www.thesportsdb.com/api/v1/json/1/eventsnext.php?id=${teamId}`);
+        const data = await res.json();
+        const event = data.events[0];
+        const date = new Date(event.dateEvent + 'T' + (event.strTime || '00:00:00'));
+        const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+        document.getElementById(elementId).innerText = `${event.strEvent} – ${date.toLocaleString(undefined, options)}`;
+      } catch (err) {
+        document.getElementById(elementId).innerText = 'Unable to load data.';
+        console.error(err);
+      }
+    }
+
+    fetchNextGame(RAVENS_ID, 'ravens-event');
+    fetchNextGame(ORIOLES_ID, 'orioles-event');
+
+    // Refresh every 5 minutes
+    setInterval(() => {
+      fetchNextGame(RAVENS_ID, 'ravens-event');
+      fetchNextGame(ORIOLES_ID, 'orioles-event');
+    }, 300000);
+  </script>
+</body>
+</html>
